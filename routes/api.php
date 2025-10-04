@@ -6,12 +6,16 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MessageController;
 
 // Test route
+
+
 Route::get('/ping', function () {
     return response()->json(['status' => 'API is working!']);
 });
 
 // Auth routes
 Route::post('/register', [AuthController::class, 'register']);
+
+
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {

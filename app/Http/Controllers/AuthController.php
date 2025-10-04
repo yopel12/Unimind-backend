@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -21,7 +23,7 @@ class AuthController extends Controller
                 'email',
                 'unique:users',
                 function ($attribute, $value, $fail) {
-                    if (!str_ends_with($value, '.su.edu.ph')) {
+                    if (!str_ends_with($value, '.edu.ph')) {
                         $fail("Only school emails ending with .su.edu.ph are allowed.");
                     }
                 }
@@ -52,27 +54,31 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'login' => 'required|string',   // username or email
-            'password' => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required'
         ]);
 
-        $field = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-
-        $user = User::where($field, $request->login)->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'login' => ['Invalid credentials.'],
-            ]);
+        // Attempt login
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json([
+                'message' => 'Invalid login details'
+            ], 401);
         }
 
-        $token = $user->createToken('api')->plainTextToken;
+        // Get logged-in user
+        $user = Auth::user();
+
+        // Create Sanctum token
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
-            'token' => $token
+            'message' => 'Login successful',
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => $user
         ]);
     }
+
 
     /**
      * Get logged-in user details.
