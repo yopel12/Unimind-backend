@@ -4,28 +4,28 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\MatchingController;
 use Pusher\Pusher;
-
 
 Route::get('/ping', function () {
     return response()->json(['status' => 'API is working!']);
 });
 
-// Auth routes
+// -------------------- AUTH ROUTES --------------------
 Route::post('/register', [AuthController::class, 'register']);
-
-
 Route::post('/login', [AuthController::class, 'login']);
-
 Route::get('/me', [AuthController::class, 'me']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
+// -------------------- CHAT ROUTES --------------------
+// Public routes for anonymous chat
 Route::get('/messages', [MessageController::class, 'index']);
 Route::post('/messages', [MessageController::class, 'store']);
 
+// -------------------- MATCHING ROUTES --------------------
+Route::post('/start-matching', [MatchingController::class, 'startMatching']);
 
-$waitingUser = null;
-
+// -------------------- ANONYMOUS MATCH HANDLER --------------------
 Route::post('/match', function (Request $request) {
     $userId = $request->input('userId');
     $filePath = storage_path('app/waiting_user.txt');
