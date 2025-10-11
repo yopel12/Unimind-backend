@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MatchingController;
+use App\Http\Controllers\ReportController;
 use Pusher\Pusher;
 
 Route::get('/ping', function () {
@@ -56,4 +57,11 @@ Route::post('/match', function (Request $request) {
             'users' => [$userId, $waitingUser],
         ]);
     }
+});
+
+// -------------------- REPORT ROUTES --------------------
+// (Requires user authentication — you can use sanctum or session auth)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/report', [ReportController::class, 'store']);   // create a report
+    Route::get('/reports', [ReportController::class, 'index']);   // view all reports (admin/moderator use)
 });
